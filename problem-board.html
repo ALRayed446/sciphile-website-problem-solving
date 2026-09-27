@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Sciphile</title>
+<style>
+:root{
+  --bg:#0d1117; --panel:#161b22; --panel-hover:#1c2330; --border:#2a313c;
+  --fg:#e6edf3; --dim:#8b949e;
+  --accent:#f2a541; --accent-ink:#241a06; --accent2:#57d9c6; --ai:#b98cf0; --ai-bg:#1b1526; --ai-border:#3a2b4a;
+  --danger:#f85149; --font: ui-monospace, "SFMono-Regular", "Roboto Mono", Menlo, Consolas, monospace;
+}
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;}
+body{background:var(--bg); color:var(--fg); font-family:var(--font); font-size:14px; line-height:1.6;
+  padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);}
+a{color:var(--accent2); cursor:pointer; text-decoration:none;}
+a:hover{text-decoration:underline;}
+header{border-bottom:1px solid var(--border); padding:16px; position:sticky; top:0; z-index:5;
+  background:linear-gradient(180deg,#161c26,#0d1117);}
+.hrow{display:flex; align-items:center; justify-content:space-between; max-width:760px; margin:0 auto;}
+.brand{font-weight:600;} .brand span{color:var(--accent);}
+.brand small{display:block; font-weight:400; color:var(--dim); font-size:11px; margin-top:2px;}
+button{font-family:var(--font); font-size:13px; background:var(--panel); color:var(--fg);
+  border:1px solid var(--border); border-radius:8px; padding:7px 12px; cursor:pointer;}
+button:hover{border-color:var(--accent2);}
+button.primary{color:var(--accent-ink); background:var(--accent); border-color:var(--accent); font-weight:600;}
+button.primary:hover{opacity:.9;}
+button:disabled{opacity:.5; cursor:default;}
+button.ghost{background:transparent;}
+button.ai{color:var(--ai); border-color:var(--ai-border);}
+textarea,input[type=text],select{width:100%; font-family:var(--font); font-size:13px; background:#0b0f15; color:var(--fg);
+  border:1px solid var(--border); border-radius:8px; padding:8px 10px; resize:vertical;}
+input[type=file]{font-size:12px; color:var(--dim);}
+textarea:focus,input:focus,select:focus{outline:none; border-color:var(--accent2);}
+main{max-width:760px; margin:0 auto; padding:16px;}
+.tabs{display:flex; gap:6px; overflow-x:auto; margin-bottom:16px; padding-bottom:2px;}
+.tab{flex:0 0 auto; padding:6px 12px; border:1px solid var(--border); border-radius:20px; font-size:12px; color:var(--dim); cursor:pointer; white-space:nowrap;}
+.tab:hover{border-color:var(--accent2);}
+.tab.active{background:var(--accent); color:var(--accent-ink); border-color:var(--accent); font-weight:600;}
+.card{border:1px solid var(--border); border-radius:10px; margin-bottom:14px; background:var(--panel); overflow:hidden;
+  box-shadow:0 1px 3px rgba(0,0,0,.25);}
+.card-head{padding:13px 15px; cursor:pointer; display:flex; flex-direction:column; gap:5px;}
+.card-head:hover{background:var(--panel-hover);}
+.card-title{font-weight:600; color:var(--fg);}
+.meta{font-size:12px; color:var(--dim);}
+.meta .accent{color:var(--accent2); font-weight:600;}
+.badge{display:inline-block; font-size:10px; text-transform:uppercase; letter-spacing:.03em; color:var(--accent);
+  border:1px solid var(--border); border-radius:4px; padding:1px 6px; margin-right:6px;}
+.card-body{border-top:1px solid var(--border); padding:15px; display:none;}
+.card-body.open{display:block;}
+.desc{white-space:pre-wrap; color:var(--fg); margin:0 0 12px 0;}
+.media img,.media video{max-width:100%; border-radius:8px; border:1px solid var(--border); margin-bottom:12px; display:block;}
+.comments{border-top:1px dashed var(--border); padding-top:10px; margin-top:12px;}
+.comment{padding:8px 0; border-bottom:1px solid #1a2029;}
+.comment:last-child{border-bottom:none;}
+.comment .meta{margin-bottom:3px;}
+.comment .txt{white-space:pre-wrap;}
+.cform{margin-top:10px;}
+.cform textarea{min-height:38px; margin-bottom:6px;}
+.cform-row{display:flex; gap:8px; align-items:center;}
+.cform-row input[type=file]{flex:1;}
+.newform{border:1px solid var(--border); border-radius:10px; padding:15px; background:var(--panel); margin-bottom:18px; display:none;
+  box-shadow:0 1px 3px rgba(0,0,0,.25);}
+.newform.open{display:block;}
+.newform label{display:block; font-size:12px; color:var(--dim); margin:8px 0 4px;}
+.newform .row{display:flex; gap:8px; margin-top:12px; justify-content:flex-end;}
+.empty,.notice{color:var(--dim); padding:20px 0; text-align:center; font-size:13px;}
+.notice.warn{color:var(--danger);}
+::placeholder{color:#4a5160;}
+.profile-head{display:flex; gap:14px; align-items:flex-start; margin-bottom:20px;}
+.profile-head img{width:56px; height:56px; border-radius:10px; border:1px solid var(--border);}
+.profile-name{font-weight:600; font-size:16px;}
+.bio{color:var(--dim); white-space:pre-wrap; margin-top:4px;}
+.back{display:inline-block; margin-bottom:14px; color:var(--dim);}
+.ai-section{margin:4px 0 14px;}
+.ai-toggle{width:100%;}
+.ai-panel{border:1px solid var(--ai-border); background:var(--ai-bg); border-radius:8px; padding:12px; margin-top:8px;}
+.ai-turn{margin-bottom:12px;}
+.ai-turn:last-child{margin-bottom:0;}
+.ai-label{font-size:11px; color:var(--dim); margin-bottom:3px;}
+.ai-q{color:var(--fg); margin-bottom:6px;}
+.ai-a{color:#ece2fb; white-space:pre-wrap;}
+.ai-input-row{display:flex; gap:8px; margin-top:6px;}
+.ai-input-row textarea{min-height:36px;}
+.ai-quick{font-size:12px; color:var(--ai); background:transparent; border:1px dashed var(--ai-border); margin-bottom:2px;}
+.ai-err{color:var(--danger); font-size:12px; margin-top:4px;}
+</style>
+</head>
+<body>
+<header>
+  <div class="hrow">
+    <div class="brand"><span>&gt;</span> sciphile<small>post a problem. solve it together.</small></div>
+    <button class="primary" id="newBtn">+ new problem</button>
+  </div>
+</header>
+<main>
+  <div class="newform" id="newForm">
+    <label for="pTitle">title</label>
+    <input type="text" id="pTitle" placeholder="e.g. prove the sum of first n odd numbers is n^2">
+    <label for="pCat">category</label>
+    <select id="pCat"></select>
+    <label for="pDesc">description</label>
+    <textarea id="pDesc" rows="4" placeholder="full problem statement, constraints, context..."></textarea>
+    <label id="pFileLabel" for="pFile">attach an image or video (optional)</label>
+    <input type="file" id="pFile" accept="image/*,video/*">
+    <div class="row">
+      <button id="pCancel">cancel</button>
+      <button class="primary" id="pSubmit">post</button>
+    </div>
+  </div>
+  <div id="view"><div class="notice">loading...</div></div>
+</main>
+<script>
+(function(){
+  var db=null, user=null, assets=null, sampleFn=null, myId=null;
+  var aiUnavailable=false; var aiPanels={};
+  var problems=[]; var expandedId=null; var unsubComments=null; var commentsCache=[];
+  var view='feed'; var categoryFilter='all';
+  var profileUserId=null; var profileBio=''; var unsubProfile=null; var editingBio=false;
+  var CATS=[['physics','Physics'],['math','Math'],['biology','Biology'],['chemistry','Chemistry'],['cs','Computer Science'],['other','Other']];
+  var viewEl=document.getElementById('view');
+
+  function esc(s){var d=document.createElement('div'); d.textContent=s==null?'':String(s); return d.innerHTML;}
+  function catLabel(k){for(var i=0;i<CATS.length;i++){if(CATS[i][0]===k)return CATS[i][1];} return 'Other';}
+  function timeAgo(ts){
+    if(!ts) return '';
+    var s=Math.max(0,(Date.now()-ts)/1000);
+    if(s<60) return 'just now';
+    if(s<3600) return Math.floor(s/60)+'m ago';
+    if(s<86400) return Math.floor(s/3600)+'h ago';
+    return Math.floor(s/86400)+'d ago';
+  }
+  function mediaHtml(mediaId,mediaType){
+    if(!mediaId) return '';
+    var t=mediaType||'';
+    if(t.indexOf('video/')===0) return '<div class="media"><video controls src="/_blob/'+esc(mediaId)+'"></video></div>';
+    return '<div class="media"><img src="/_blob/'+esc(mediaId)+'" alt=""></div>';
+  }
+
+  function collectIds(extra){
+    var ids={};
+    problems.forEach(function(p){ if(p.authorId) ids[p.authorId]=1; });
+    commentsCache.forEach(function(c){ if(c.authorId) ids[c.authorId]=1; });
+    if(extra) extra.forEach(function(i){ if(i) ids[i]=1; });
+    return Object.keys(ids);
+  }
+  function nameFor(profiles,id){
+    if(!id) return 'anonymous';
+    var p=profiles && profiles[id];
+    return (p && p.name) ? p.name : 'anonymous';
+  }
+  function authorLink(profiles,id){
+    return '<a data-profile="'+esc(id||'')+'" class="accent">'+esc(nameFor(profiles,id))+'</a>';
+  }
+
+  async function render(){
+    var extra=[]; if(profileUserId) extra.push(profileUserId);
+    var ids=collectIds(extra);
+    var profiles={};
+    if(user && ids.length){ try{ profiles=await user.profiles(ids); }catch(e){} }
+    if(view==='profile'){ renderProfile(profiles); return; }
+    renderFeed(profiles);
+  }
+
+  function renderFeed(profiles){
+    var html='<div class="tabs" id="tabs"></div>';
+    var list=problems.filter(function(p){ return categoryFilter==='all' || p.category===categoryFilter; });
+    if(!list.length){
+      html+='<div class="empty">no problems here yet. be the first.</div>';
+    } else {
+      list.forEach(function(p){
+        var open=expandedId===p.id;
+        html+='<div class="card" data-id="'+esc(p.id)+'">'
+          +'<div class="card-head" data-toggle="'+esc(p.id)+'">'
+            +'<div class="card-title">'+esc(p.title||'(untitled)')+'</div>'
+            +'<div class="meta"><span class="badge">'+esc(catLabel(p.category))+'</span>by '+authorLink(profiles,p.authorId)+' &middot; '+esc(timeAgo(p.createdAt))+' &middot; '+(open?commentsCache.length:'&hellip;')+' comments</div>'
+          +'</div>'
+          +'<div class="card-body'+(open?' open':'')+'">'
+            +(open? renderBody(p,profiles) : '')
+          +'</div>'
+        +'</div>';
+      });
+    }
+    viewEl.innerHTML=html;
+    var tabsEl=document.getElementById('tabs');
+    var tabsHtml='<div class="tab'+(categoryFilter==='all'?' active':'')+'" data-cat="all">All</div>';
+    CATS.forEach(function(c){ tabsHtml+='<div class="tab'+(categoryFilter===c[0]?' active':'')+'" data-cat="'+c[0]+'">'+c[1]+'</div>'; });
+    tabsEl.innerHTML=tabsHtml;
+    bindFeedEvents();
+  }
+
+  function renderAiSection(p){
+    if(!sampleFn || aiUnavailable) return '';
+    var st=aiPanels[p.id];
+    if(!st){ st={open:false,turns:[],loading:false,controller:null,nextId:1}; aiPanels[p.id]=st; }
+    var out='<div class="ai-section">';
+    if(!st.open){
+      out+='<button class="ai ai-toggle" data-ai-toggle="'+esc(p.id)+'">&#129302; ask AI for help</button>';
+    } else {
+      out+='<button class="ai ai-toggle" data-ai-toggle="'+esc(p.id)+'">&#129302; hide AI helper</button>';
+      out+='<div class="ai-panel">';
+      if(!st.turns.length){
+        out+='<div class="meta" style="margin-bottom:6px;">ask a question about this problem, or get a quick hint.</div>';
+      }
+      st.turns.forEach(function(t){
+        out+='<div class="ai-turn"><div class="ai-label">you asked</div><div class="ai-q">'+esc(t.q)+'</div>'
+          +'<div class="ai-label">&#129302; AI</div><div class="ai-a" id="aiAns_'+esc(p.id)+'_'+t.id+'">'+esc(t.a)+'</div>'
+          +(t.error?'<div class="ai-err">'+esc(t.error)+'</div>':'')
+        +'</div>';
+      });
+      out+='<div class="ai-input-row">'
+        +'<textarea id="aiInput_'+esc(p.id)+'" rows="1" placeholder="ask anything about this problem..."></textarea>'
+        +(st.loading? '<button data-ai-stop="'+esc(p.id)+'">stop</button>' : '<button class="primary" data-ai-ask="'+esc(p.id)+'">ask</button>')
+      +'</div>';
+      if(!st.loading) out+='<button class="ai-quick" data-ai-hint="'+esc(p.id)+'">&#128161; just give me a hint</button>';
+      out+='</div>';
+    }
+    out+='</div>';
+    return out;
+  }
+
+  function renderBody(p,profiles){
+    var out=mediaHtml(p.mediaId,p.mediaType);
+    out+='<p class="desc">'+esc(p.description||'')+'</p>';
+    out+=renderAiSection(p);
+    out+='<div class="comments">';
+    if(!commentsCache.length){
+      out+='<div class="empty" style="padding:6px 0;">no comments yet</div>';
+    } else {
+      commentsCache.forEach(function(c){
+        out+='<div class="comment">'
+          +'<div class="meta">'+authorLink(profiles,c.authorId)+' &middot; '+esc(timeAgo(c.createdAt))+'</div>'
+          +mediaHtml(c.mediaId,c.mediaType)
+          +'<div class="txt">'+esc(c.text)+'</div>'
+        +'</div>';
+      });
+    }
+    out+='</div>';
+    out+='<div class="cform">'
+      +'<textarea id="cInput_'+esc(p.id)+'" rows="2" placeholder="post your solution or comment..."></textarea>'
+      +'<div class="cform-row">'
+        +(assets?'<input type="file" id="cFile_'+esc(p.id)+'" accept="image/*,video/*">':'')
+        +'<button class="primary" data-comment="'+esc(p.id)+'">send</button>'
+      +'</div>'
+    +'</div>';
+    return out;
+  }
+
+  function renderProfile(profiles){
+    var p=profiles[profileUserId] || {name:'',avatarUrl:''};
+    var mine=myId && profileUserId===myId;
+    var html='<a class="back" data-back="1">&larr; back to feed</a>';
+    html+='<div class="profile-head"><img src="'+esc(p.avatarUrl||'')+'" alt=""><div>'
+      +'<div class="profile-name">'+esc(p.name||'anonymous')+'</div>';
+    if(editingBio){
+      html+='<textarea id="bioInput" rows="3" style="margin-top:6px;max-width:340px;">'+esc(profileBio)+'</textarea>'
+        +'<div style="margin-top:6px;"><button class="primary" id="bioSave">save</button> <button class="ghost" id="bioCancel">cancel</button></div>';
+    } else {
+      html+='<div class="bio">'+(esc(profileBio)||'no bio yet.')+'</div>';
+      if(mine) html+='<div style="margin-top:6px;"><button class="ghost" id="bioEdit">edit bio</button></div>';
+    }
+    html+='</div></div>';
+    var theirs=problems.filter(function(x){return x.authorId===profileUserId;});
+    html+='<div class="meta" style="margin-bottom:8px;">'+theirs.length+' problem'+(theirs.length===1?'':'s')+' posted</div>';
+    if(!theirs.length){
+      html+='<div class="empty">nothing posted yet.</div>';
+    } else {
+      theirs.forEach(function(p2){
+        html+='<div class="card"><div class="card-head" data-openfeed="'+esc(p2.id)+'">'
+          +'<div class="card-title">'+esc(p2.title||'(untitled)')+'</div>'
+          +'<div class="meta"><span class="badge">'+esc(catLabel(p2.category))+'</span>'+esc(timeAgo(p2.createdAt))+'</div>'
+        +'</div></div>';
+      });
+    }
+    viewEl.innerHTML=html;
+    bindProfileEvents();
+  }
+
+  function bindFeedEvents(){
+    Array.prototype.forEach.call(document.querySelectorAll('[data-toggle]'),function(el){
+      el.addEventListener('click',function(){ toggleCard(el.getAttribute('data-toggle')); });
+    });
+    Array.prototype.forEach.call(document.querySelectorAll('[data-comment]'),function(el){
+      el.addEventListener('click',function(){ submitComment(el.getAttribute('data-comment')); });
+    });
+    Array.prototype.forEach.call(document.querySelectorAll('[data-profile]'),function(el){
+      el.addEventListener('click',function(ev){ ev.stopPropagation(); goProfile(el.getAttribute('data-profile')); });
+    });
+    Array.prototype.forEach.call(document.querySelectorAll('[data-cat]'),function(el){
+      el.addEventListener('click',function(){ categoryFilter=el.getAttribute('data-cat'); render(); });
+    });
+    Array.prototype.forEach.call(document.querySelectorAll('[data-ai-toggle]'),function(el){
+      el.addEventListener('click',function(ev){ ev.stopPropagation(); toggleAi(el.getAttribute('data-ai-toggle')); });
+    });
+    Array.prototype.forEach.call(document.querySelectorAll('[data-ai-hint]'),function(el){
+      el.addEventListener('click',function(ev){ ev.stopPropagation(); askHint(el.getAttribute('data-ai-hint')); });
+    });
+    Array.prototype.forEach.call(document.querySelectorAll('[data-ai-ask]'),function(el){
+      el.addEventListener('click',function(ev){ ev.stopPropagation(); askCustom(el.getAttribute('data-ai-ask')); });
+    });
+    Array.prototype.forEach.call(document.querySelectorAll('[data-ai-stop]'),function(el){
+      el.addEventListener('click',function(ev){ ev.stopPropagation(); stopAi(el.getAttribute('data-ai-stop')); });
+    });
+  }
+
+  function bindProfileEvents(){
+    var back=document.querySelector('[data-back]');
+    if(back) back.addEventListener('click',function(){ leaveProfile(); view='feed'; render(); });
+    Array.prototype.forEach.call(document.querySelectorAll('[data-openfeed]'),function(el){
+      el.addEventListener('click',function(){
+        var id=el.getAttribute('data-openfeed');
+        leaveProfile(); view='feed'; expandedId=null; render();
+        toggleCard(id);
+      });
+    });
+    var be=document.getElementById('bioEdit');
+    if(be) be.addEventListener('click',function(){ editingBio=true; render(); });
+    var bc=document.getElementById('bioCancel');
+    if(bc) bc.addEventListener('click',function(){ editingBio=false; render(); });
+    var bs=document.getElementById('bioSave');
+    if(bs) bs.addEventListener('click',async function(){
+      var val=document.getElementById('bioInput').value.trim();
+      if(!db||!myId) return;
+      bs.disabled=true;
+      try{ await db.doc('profiles/'+myId).set({bio:val}); editingBio=false; }
+      catch(e){ alert('could not save bio: '+(e&&e.code||'error')); }
+      bs.disabled=false;
+    });
+  }
+
+  function toggleCard(id){
+    if(expandedId===id){
+      expandedId=null;
+      if(unsubComments){ unsubComments(); unsubComments=null; }
+      commentsCache=[]; render(); return;
+    }
+    expandedId=id; commentsCache=[];
+    if(unsubComments){ unsubComments(); unsubComments=null; }
+    render();
+    if(!db) return;
+    unsubComments=db.collection('comments').where('problemId','==',id).orderBy('createdAt','asc')
+      .onSnapshot(function(snap){ commentsCache=snap.docs.map(function(d){return d.data();}); render(); },
+        function(err){ console.error(err); });
+  }
+
+  function goProfile(id){
+    if(!id) return;
+    leaveProfile();
+    view='profile'; profileUserId=id; profileBio=''; editingBio=false;
+    render();
+    if(!db) return;
+    unsubProfile=db.doc('profiles/'+id).onSnapshot(function(snap){
+      var d=snap.data(); profileBio=(d&&d.bio)||''; render();
+    },function(err){ console.error(err); });
+  }
+  function leaveProfile(){
+    if(unsubProfile){ unsubProfile(); unsubProfile=null; }
+    profileUserId=null; editingBio=false;
+  }
+
+  async function uploadIfAny(fileInputEl){
+    if(!fileInputEl || !fileInputEl.files || !fileInputEl.files[0] || !assets) return {mediaId:null,mediaType:null};
+    var f=fileInputEl.files[0];
+    try{
+      var r=await assets.upload(f);
+      return {mediaId:r.id, mediaType:r.contentType};
+    }catch(e){ alert('media upload failed: '+(e&&e.code||'error')); return {mediaId:null,mediaType:null}; }
+  }
+
+  async function submitComment(problemId){
+    if(!db) return;
+    var ta=document.getElementById('cInput_'+problemId);
+    var text=ta && ta.value.trim();
+    var fileEl=document.getElementById('cFile_'+problemId);
+    if(!text && !(fileEl&&fileEl.files&&fileEl.files[0])) return;
+    var authorId=myId;
+    var btn=document.querySelector('[data-comment="'+problemId+'"]');
+    if(btn) btn.disabled=true;
+    var media=await uploadIfAny(fileEl);
+    try{
+      await db.collection('comments').add({problemId:problemId, text:text||'', authorId:authorId,
+        mediaId:media.mediaId, mediaType:media.mediaType, createdAt:Date.now()});
+      if(ta) ta.value=''; if(fileEl) fileEl.value='';
+    }catch(e){ alert('could not post comment: '+(e&&e.code||'error')); }
+    if(btn) btn.disabled=false;
+  }
+
+  // ---- AI helper ----
+  function findProblem(id){ for(var i=0;i<problems.length;i++){ if(problems[i].id===id) return problems[i]; } return null; }
+  function toggleAi(id){ var st=aiPanels[id]; if(!st){ st={open:false,turns:[],loading:false,controller:null,nextId:1}; aiPanels[id]=st; } st.open=!st.open; render(); }
+
+  function historyText(st){
+    var out='';
+    st.turns.forEach(function(t){ if(!t.pending) out+='Student asked: '+t.q+'\nTutor replied: '+t.a+'\n\n'; });
+    return out;
+  }
+  function contextText(p){
+    return 'Title: '+(p.title||'')+'\nCategory: '+catLabel(p.category)+'\nDescription: '+(p.description||'');
+  }
+
+  async function runSample(id,promptText,displayQ){
+    if(!sampleFn) return;
+    var st=aiPanels[id]; if(!st) return;
+    var turn={id:st.nextId++, q:displayQ, a:'', pending:true};
+    st.turns.push(turn); st.loading=true; st.controller=new AbortController();
+    await render();
+    var elId='aiAns_'+id+'_'+turn.id;
+    try{
+      var res=await sampleFn(promptText,{
+        signal:st.controller.signal, modelTier:'default',
+        onText:function(ev){ var el=document.getElementById(elId); if(el) el.textContent=ev.text; turn.a=ev.text; }
+      });
+      turn.a=res.text; turn.pending=false;
+    }catch(e){
+      var code=e&&e.code;
+      if(code==='not_granted'||code==='sampling_disabled'||code==='not_declared'||code==='capability_disabled'||code==='capability_removed'){
+        aiUnavailable=true; st.turns.pop();
+      } else if(code==='cancelled'){
+        turn.a=e.text||turn.a; turn.pending=false;
+      } else {
+        turn.a=e&&e.text||turn.a; turn.pending=false; turn.error=(code||'error')+' \u2014 you can try again';
+      }
+    }
+    st.loading=false; st.controller=null;
+    render();
+  }
+
+  function askHint(id){
+    var p=findProblem(id); if(!p) return;
+    var st=aiPanels[id]; if(st&&st.loading) return;
+    var prompt='You are a friendly, encouraging tutor. A student posted this problem on a study board:\n\n'
+      +contextText(p)+'\n\n'+(st?historyText(st):'')
+      +'Give a short, helpful hint that nudges the student toward the solution WITHOUT giving away the full answer. Keep it to a few sentences.';
+    runSample(id,prompt,'(asked for a hint)');
+  }
+  function askCustom(id){
+    var ta=document.getElementById('aiInput_'+id);
+    var q=ta && ta.value.trim();
+    if(!q) return;
+    var p=findProblem(id); if(!p) return;
+    var st=aiPanels[id];
+    var prompt='You are a friendly, encouraging tutor helping on a study board. The problem:\n\n'
+      +contextText(p)+'\n\n'+(st?historyText(st):'')
+      +'Student question: '+q+'\n\nAnswer helpfully. Prefer guiding hints over fully solving it, unless the student clearly asks for the complete solution.';
+    if(ta) ta.value='';
+    runSample(id,prompt,q);
+  }
+  function stopAi(id){ var st=aiPanels[id]; if(st&&st.controller) st.controller.abort(); }
+
+  var newBtn=document.getElementById('newBtn');
+  var newForm=document.getElementById('newForm');
+  var pCat=document.getElementById('pCat');
+  CATS.forEach(function(c){ var o=document.createElement('option'); o.value=c[0]; o.textContent=c[1]; pCat.appendChild(o); });
+  var pCancel=document.getElementById('pCancel');
+  var pSubmit=document.getElementById('pSubmit');
+  newBtn.addEventListener('click',function(){ newForm.classList.toggle('open'); });
+  pCancel.addEventListener('click',function(){
+    newForm.classList.remove('open');
+    document.getElementById('pTitle').value=''; document.getElementById('pDesc').value='';
+    document.getElementById('pFile').value='';
+  });
+  pSubmit.addEventListener('click',async function(){
+    var title=document.getElementById('pTitle').value.trim();
+    var desc=document.getElementById('pDesc').value.trim();
+    var cat=pCat.value;
+    var fileEl=document.getElementById('pFile');
+    if(!title){ alert('give the problem a title'); return; }
+    if(!db){ alert('board storage is not available in this view'); return; }
+    pSubmit.disabled=true;
+    var media=await uploadIfAny(fileEl);
+    try{
+      await db.collection('problems').add({title:title, description:desc, category:cat, authorId:myId,
+        mediaId:media.mediaId, mediaType:media.mediaType, createdAt:Date.now()});
+      document.getElementById('pTitle').value=''; document.getElementById('pDesc').value=''; fileEl.value='';
+      newForm.classList.remove('open');
+    }catch(e){ alert('could not post problem: '+(e&&e.code||'error')); }
+    pSubmit.disabled=false;
+  });
+
+  async function init(){
+    try{ db=(window.claude && await window.claude.use('db')) || null; }catch(e){ db=null; }
+    try{ user=(window.claude && await window.claude.use('user')) || null; }catch(e){ user=null; }
+    try{ assets=(window.claude && await window.claude.use('assets')) || null; }catch(e){ assets=null; }
+    try{ sampleFn=(window.claude && await window.claude.use('sample')) || null; }catch(e){ sampleFn=null; }
+    if(user){ try{ myId=await user.id(); }catch(e){ myId=null; } }
+    if(!assets) document.getElementById('pFileLabel').style.display='none';
+    if(!assets){ var pf=document.getElementById('pFile'); if(pf) pf.style.display='none'; }
+    if(!db){
+      viewEl.innerHTML='<div class="notice warn">this board needs to be opened as a Claude artifact (not a plain file) to store and share problems.</div>';
+      return;
+    }
+    db.collection('problems').orderBy('createdAt','desc').onSnapshot(function(snap){
+      problems=snap.docs.map(function(d){ var data=d.data(); data.id=d.id; return data; });
+      render();
+    },function(err){
+      viewEl.innerHTML='<div class="notice warn">could not load problems ('+esc(err&&err.code)+')</div>';
+    });
+  }
+  init();
+})();
+</script>
+</body>
+</html>
